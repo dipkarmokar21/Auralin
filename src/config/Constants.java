@@ -1,3 +1,5 @@
+package config;
+
 public class Constants {
     public static final String SPOTIFY_GREEN = "#1DB954";
     public static final String BG_BLACK = "#121212";

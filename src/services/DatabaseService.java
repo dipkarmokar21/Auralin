@@ -1,3 +1,6 @@
+package services;
+
+import config.Constants;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -6,6 +9,8 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.Mp3File;
+import model.Song;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Comparator;

@@ -1,5 +1,8 @@
+package model;
+
 import javafx.scene.image.Image;
 import javafx.util.Duration;
+import config.Constants;
 
 public class Song {
     private String title;
