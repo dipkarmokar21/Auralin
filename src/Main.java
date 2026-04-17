@@ -539,6 +539,7 @@ public class Main extends Application {
         }
     }
 
+
     private void refreshCurrentView() {
         if (activeView.equals("Home")) showHomeView();
         else if (activeView.equals("Library")) showLibraryView();
