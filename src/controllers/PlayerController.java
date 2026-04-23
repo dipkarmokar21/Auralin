@@ -13,9 +13,9 @@ import java.io.File;
 import java.util.Random;
 
 public class PlayerController {
-    private DatabaseService db;
+    private final DatabaseService db;
     private MediaPlayer player;
-    private PlayerBar playerBar;
+    private final PlayerBar playerBar;
     private boolean isShuffle = false;
     private int repeatMode = 0;
     private Runnable onSongChange;
@@ -52,11 +52,14 @@ public class PlayerController {
             
             player.currentTimeProperty().addListener((obs, ot, nt) -> {
                 double totalMillis = m.getDuration().toMillis();
-                if (totalMillis > 0 && !Double.isNaN(totalMillis)) {
-                    double pct = nt.toMillis() / totalMillis;
+                if (totalMillis <= 0 || Double.isNaN(totalMillis)) return;
+                double pct = nt.toMillis() / totalMillis;
+                String cur = formatTime(nt);
+                String tot = formatTime(m.getDuration());
+                Platform.runLater(() -> {
                     playerBar.updateProgress(pct);
-                }
-                playerBar.updateTime(formatTime(nt), formatTime(m.getDuration()));
+                    playerBar.updateTime(cur, tot);
+                });
             });
             
             player.setOnEndOfMedia(() -> {

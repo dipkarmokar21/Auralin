@@ -1,7 +1,6 @@
 package managers;
 
 import controllers.PlayerController;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;
@@ -52,6 +51,11 @@ public class ViewManager {
             public boolean isCurrentSong(Song song) {
                 return song == db.getCurrent();
             }
+
+            @Override
+            public void onLikeToggle(Song song) {
+                // Song already toggled in SongTable, just refresh if needed
+            }
         };
         
         MusicCard.MusicCardListener cardListener = new MusicCard.MusicCardListener() {
@@ -90,15 +94,6 @@ public class ViewManager {
                 break;
             case "Liked":
                 viewContent = new LikedView(db.getLikedSongs(), tableListener);
-                break;
-            case "Queue":
-                ObservableList<Song> queueList = FXCollections.observableArrayList(db.getAllSongs());
-                Song current = db.getCurrent();
-                if (current != null) {
-                    queueList.remove(current);
-                    queueList.add(0, current);
-                }
-                viewContent = new QueueView(queueList, tableListener);
                 break;
         }
         

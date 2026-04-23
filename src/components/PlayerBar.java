@@ -12,6 +12,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.control.OverrunStyle;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.shape.SVGPath;
+import javafx.scene.transform.Scale;
+import javafx.animation.ScaleTransition;
+import javafx.util.Duration;
 
 import model.Song;
 import config.Constants;
@@ -23,10 +28,29 @@ public class PlayerBar extends HBox {
     private Label lblTimeTotal = new Label("0:00");
     private ImageView imgNowPlaying = new ImageView(new Image(Constants.DEFAULT_ART));
     private Slider progressSlider = new Slider(0, 100, 0);
+    private javafx.scene.Node cachedTrack = null;
+    private boolean isDragging = false;
     private Slider volSlider = new Slider(0, 1, 0.7);
     private Button btnPlay = new Button("▶");
-    private Button btnLove = new Button("\u2661");
-    private Button btnQueue = new Button("≡");
+
+    // heart.svg — loaded from src/resources/heart.svg (viewBox 0 0 512 512)
+    private static final String HEART_PATH = loadHeartPath();
+
+    private static String loadHeartPath() {
+        try {
+            java.io.InputStream is = PlayerBar.class.getResourceAsStream("/resources/heart.svg");
+            if (is == null) return "";
+            String xml = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("d=\"([^\"]+)\"").matcher(xml);
+            return m.find() ? m.group(1) : "";
+        } catch (Exception e) { return ""; }
+    }
+
+    private SVGPath heartOutlinePath = new SVGPath();
+    private SVGPath heartFilledPath  = new SVGPath();
+    private StackPane btnLove = new StackPane(heartOutlinePath, heartFilledPath);
+    private boolean shuffleEnabled = false;
+    private int repeatMode = 0; // 0=off, 1=one, 2=all
     
     private PlayerBarListener listener;
     
@@ -37,7 +61,6 @@ public class PlayerBar extends HBox {
         void onShuffle(boolean enabled);
         void onRepeat(int mode);
         void onLove();
-        void onQueue();
         void onSeek(double position);
         void onVolumeChange(double volume);
     }
@@ -60,7 +83,7 @@ public class PlayerBar extends HBox {
         
         getChildren().addAll(info, center, extra);
     }
-    
+
     private HBox createInfoSection() {
         HBox info = new HBox(15);
         info.setAlignment(Pos.CENTER_LEFT);
@@ -79,12 +102,31 @@ public class PlayerBar extends HBox {
         lblArtist.setMaxWidth(180);
         lblArtist.setTextOverrun(OverrunStyle.ELLIPSIS);
         
-        btnLove.getStyleClass().add("love-btn");
-        btnLove.setOnAction(e -> listener.onLove());
+        // Outline heart — always visible, gray stroke
+        heartOutlinePath.setContent(HEART_PATH);
+        heartOutlinePath.setFill(Color.TRANSPARENT);
+        heartOutlinePath.setStroke(Color.web("#B3B3B3"));
+        heartOutlinePath.setStrokeWidth(1.5);
+        double scale = 1.0; // 24 viewBox → 24px
+        heartOutlinePath.getTransforms().add(new Scale(scale, scale));
+        heartOutlinePath.setMouseTransparent(true);
+
+        // Filled heart — same path, red fill, hidden by default
+        heartFilledPath.setContent(HEART_PATH);
+        heartFilledPath.setFill(Color.web("#FA2D48"));
+        heartFilledPath.setStroke(Color.TRANSPARENT);
+        heartFilledPath.getTransforms().add(new Scale(scale, scale));
+        heartFilledPath.setOpacity(0);
+        heartFilledPath.setMouseTransparent(true);
+
+        btnLove.setAlignment(Pos.CENTER);
+        btnLove.setPrefSize(28, 28);
+        btnLove.setStyle("-fx-cursor: hand;");
+        btnLove.setOnMouseClicked(e -> listener.onLove());
         info.getChildren().addAll(imgNowPlaying, text, btnLove);
         return info;
     }
-    
+
     private VBox createCenterSection() {
         VBox center = new VBox(8);
         center.setAlignment(Pos.CENTER);
@@ -102,16 +144,18 @@ public class PlayerBar extends HBox {
         bP.setOnAction(e -> listener.onPrevious());
         bN.setOnAction(e -> listener.onNext());
         bS.setOnAction(e -> {
-            boolean shuffle = !bS.getStyle().contains(Constants.SPOTIFY_GREEN);
-            listener.onShuffle(shuffle);
-            bS.setStyle("-fx-text-fill: " + (shuffle ? Constants.SPOTIFY_GREEN : Constants.TEXT_GRAY) + ";");
+            shuffleEnabled = !shuffleEnabled;
+            bS.setStyle("-fx-text-fill: " + (shuffleEnabled ? Constants.SPOTIFY_GREEN : "white") + "; -fx-font-size: 18px;");
+            listener.onShuffle(shuffleEnabled);
         });
         bR.setOnAction(e -> {
-            String currentText = bR.getText();
-            int mode = currentText.equals("🔁") ? 1 : (currentText.equals("🔂") ? 2 : 0);
-            listener.onRepeat(mode);
-            bR.setText(mode == 1 ? "🔂" : "🔁");
-            bR.setStyle("-fx-text-fill: " + (mode > 0 ? Constants.SPOTIFY_GREEN : Constants.TEXT_GRAY) + ";");
+            repeatMode = (repeatMode + 1) % 3;
+            switch (repeatMode) {
+                case 0 -> { bR.setText("🔁"); bR.setStyle("-fx-text-fill: white; -fx-font-size: 18px;"); }
+                case 1 -> { bR.setText("🔂"); bR.setStyle("-fx-text-fill: " + Constants.SPOTIFY_GREEN + "; -fx-font-size: 18px;"); }
+                case 2 -> { bR.setText("🔁"); bR.setStyle("-fx-text-fill: " + Constants.SPOTIFY_GREEN + "; -fx-font-size: 18px;"); }
+            }
+            listener.onRepeat(repeatMode);
         });
         
         btns.getChildren().addAll(bS, bP, btnPlay, bN, bR);
@@ -124,8 +168,11 @@ public class PlayerBar extends HBox {
         progressSlider.setPrefWidth(1);
         progressSlider.getStyleClass().add("spotify-slider");
         
-        progressSlider.setOnMousePressed(e -> {});
-        progressSlider.setOnMouseReleased(e -> listener.onSeek(progressSlider.getValue() / 100.0));
+        progressSlider.setOnMousePressed(e -> isDragging = true);
+        progressSlider.setOnMouseReleased(e -> {
+            isDragging = false;
+            listener.onSeek(progressSlider.getValue() / 100.0);
+        });
         progressSlider.setOnMouseClicked(e -> {
             double pct = e.getX() / progressSlider.getWidth();
             progressSlider.setValue(pct * 100);
@@ -133,10 +180,13 @@ public class PlayerBar extends HBox {
         });
         
         progressSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            javafx.scene.Node track = progressSlider.lookup(".track");
-            if (track != null) {
+            if (cachedTrack == null) cachedTrack = progressSlider.lookup(".track");
+            if (cachedTrack != null) {
                 double percent = (newVal.doubleValue() / progressSlider.getMax()) * 100;
-                track.setStyle(String.format("-fx-background-color: linear-gradient(to right, #FA2D48 %f%%, #4D4D4D %f%%);", percent, percent));
+                cachedTrack.setStyle(String.format(
+                    "-fx-background-color: linear-gradient(to right, #FA2D48 %.4f%%, #4D4D4D %.4f%%);",
+                    percent, percent
+                ));
             }
         });
         
@@ -150,15 +200,11 @@ public class PlayerBar extends HBox {
         center.getChildren().addAll(btns, timeBar);
         return center;
     }
-    
+
     private HBox createExtraSection() {
         HBox extra = new HBox(15);
         extra.setAlignment(Pos.CENTER_RIGHT);
         extra.setMinWidth(250);
-        
-        btnQueue.getStyleClass().add("control-icon");
-        btnQueue.setStyle("-fx-font-size: 22px;");
-        btnQueue.setOnAction(e -> listener.onQueue());
         
         volSlider.setPrefWidth(100);
         volSlider.valueProperty().addListener((o, old, nv) -> listener.onVolumeChange(nv.doubleValue()));
@@ -166,7 +212,7 @@ public class PlayerBar extends HBox {
         Label lblVol = new Label("🔊");
         lblVol.setTextFill(Color.WHITE);
         lblVol.setStyle("-fx-font-size: 22px;");
-        extra.getChildren().addAll(btnQueue, lblVol, volSlider);
+        extra.getChildren().addAll(lblVol, volSlider);
         return extra;
     }
     
@@ -184,12 +230,22 @@ public class PlayerBar extends HBox {
     }
     
     public void updateLoveButton(boolean isLiked) {
+        ScaleTransition pop = new ScaleTransition(Duration.millis(120), btnLove);
+        pop.setFromX(1.0); pop.setFromY(1.0);
+        pop.setToX(1.35);  pop.setToY(1.35);
+        pop.setAutoReverse(true);
+        pop.setCycleCount(2);
+        pop.play();
+
         if (isLiked) {
-            btnLove.setText("❤");
-            btnLove.setStyle("-fx-text-fill: " + Constants.SPOTIFY_GREEN + ";");
+            heartFilledPath.setOpacity(1);
+            heartOutlinePath.setStroke(Color.TRANSPARENT);
+            DropShadow glow = new DropShadow(8, Color.web("#FA2D48"));
+            heartFilledPath.setEffect(glow);
         } else {
-            btnLove.setText("\u2661");
-            btnLove.setStyle("-fx-text-fill: white;");
+            heartFilledPath.setOpacity(0);
+            heartOutlinePath.setStroke(Color.web("#B3B3B3"));
+            heartFilledPath.setEffect(null);
         }
     }
     
@@ -198,11 +254,15 @@ public class PlayerBar extends HBox {
     }
     
     public void updateProgress(double percent) {
-        progressSlider.setValue(percent * 100);
+        if (!isDragging) {
+            progressSlider.setValue(percent * 100);
+        }
     }
     
     public void updateTime(String current, String total) {
-        lblTimeCurrent.setText(current);
+        if (!isDragging) {
+            lblTimeCurrent.setText(current);
+        }
         lblTimeTotal.setText(total);
     }
     

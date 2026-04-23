@@ -38,7 +38,7 @@ public class LibraryView extends VBox {
         title.setTextFill(Color.WHITE);
         
         HBox actions = new HBox(15);
-        Button addFiles = new Button("➕ Add Files");
+        Button addFiles = new Button("➕ Add Songs");
         addFiles.getStyleClass().add("action-btn");
         addFiles.setOnAction(e -> listener.onAddFiles());
         

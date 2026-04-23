@@ -7,7 +7,6 @@ import components.Sidebar;
 import controllers.PlayerController;
 import managers.ViewManager;
 import services.DatabaseService;
-import utils.DialogHelper;
 import utils.FileImportService;
 import config.Constants;
 import views.LibraryView;
@@ -15,26 +14,20 @@ import views.LibraryView;
 public class Main extends Application {
     private DatabaseService db = new DatabaseService();
     private StackPane contentArea = new StackPane();
-    private String userName;
+    private String userName = "User";
     
     private Sidebar sidebar;
     private PlayerBar playerBar;
     private PlayerController playerController;
     private ViewManager viewManager;
     private FileImportService fileImportService;
-    
-    private boolean isQueueVisible = false;
-    private String lastActiveView = "Home";
-    
+
     public static void main(String[] args) {
         launch(args);
     }
     
     @Override
     public void start(Stage stage) {
-        // Get user name
-        userName = DialogHelper.showUserNameDialog();
-        
         // Initialize services
         fileImportService = new FileImportService(db);
         
@@ -79,10 +72,7 @@ public class Main extends Application {
         });
         
         // Create sidebar
-        sidebar = new Sidebar(view -> {
-            isQueueVisible = false;
-            viewManager.showView(view);
-        });
+        sidebar = new Sidebar(view -> viewManager.showView(view));
         
         // Show initial view
         viewManager.showView("Home");
@@ -134,11 +124,6 @@ public class Main extends Application {
             }
             
             @Override
-            public void onQueue() {
-                handleQueueToggle();
-            }
-            
-            @Override
             public void onSeek(double position) {
                 playerController.seek(position);
             }
@@ -148,19 +133,6 @@ public class Main extends Application {
                 playerController.setVolume(volume);
             }
         };
-    }
-    
-    private void handleQueueToggle() {
-        if (!isQueueVisible) {
-            lastActiveView = viewManager.getActiveView();
-            viewManager.showView("Queue");
-            sidebar.setActiveView("Queue");
-            isQueueVisible = true;
-        } else {
-            isQueueVisible = false;
-            viewManager.showView(lastActiveView);
-            sidebar.setActiveView(lastActiveView);
-        }
     }
     
     private void applyGlobalStyles(Scene scene) {

@@ -1,7 +1,7 @@
 package config;
 
 public class Constants {
-    public static final String SPOTIFY_GREEN = "#1DB954";
+    public static final String SPOTIFY_GREEN = "#b92a1dff";
     public static final String BG_BLACK = "#121212";
     public static final String SIDEBAR_BLACK = "#000000";
     public static final String TEXT_GRAY = "#B3B3B3";
