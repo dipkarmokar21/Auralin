@@ -15,19 +15,21 @@ javac -cp "lib/*;src" -d out ^
     src/views/SearchView.java ^
     src/views/LibraryView.java ^
     src/views/LikedView.java ^
-    src/views/QueueView.java ^
+    src/views/NowPlayingView.java ^
     src/ui/SongTable.java ^
     src/model/Song.java ^
     src/services/DatabaseService.java ^
     src/config/Constants.java ^
     src/controllers/PlayerController.java ^
     src/managers/ViewManager.java ^
-    src/utils/DialogHelper.java ^
     src/utils/FileImportService.java
 
 if %errorlevel% equ 0 (
     echo.
     echo ✓ Compilation successful!
+    REM Copy resources to out folder
+    if not exist "out\resources" mkdir out\resources
+    xcopy /Y /Q "src\resources\*" "out\resources\" >nul
     echo.
     echo To run the application, use:
     echo java -cp "lib/*;out" Main

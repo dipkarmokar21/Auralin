@@ -24,7 +24,6 @@ import config.Constants;
 public class SongTable extends TableView<Song> {
     private SongTableListener listener;
 
-    // heart.svg path loader
     private static final String HEART_PATH = loadHeartPath();
 
     private static String loadHeartPath() {
@@ -36,24 +35,37 @@ public class SongTable extends TableView<Song> {
             return m.find() ? m.group(1) : "";
         } catch (Exception e) { return ""; }
     }
-    
+
     public interface SongTableListener {
         void onSongDoubleClick(Song song);
         boolean isCurrentSong(Song song);
         void onLikeToggle(Song song);
     }
-    
+
     public SongTable(ObservableList<Song> items, SongTableListener listener) {
         super(items);
         this.listener = listener;
         setupTable();
+        skinProperty().addListener((obs, oldSkin, newSkin) -> {
+            if (newSkin != null) hideScrollBars();
+        });
+        javafx.application.Platform.runLater(this::hideScrollBars);
     }
-    
+
+    private void hideScrollBars() {
+        lookupAll(".scroll-bar").forEach(node -> {
+            node.setVisible(false);
+            node.setManaged(false);
+            node.setStyle("-fx-pref-width: 0; -fx-pref-height: 0; -fx-max-width: 0; -fx-max-height: 0;");
+        });
+    }
+
     private void setupTable() {
         setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         getStyleClass().add("spotify-table");
-        
+
         TableColumn<Song, Song> titleCol = new TableColumn<>("TITLE");
+        titleCol.setSortable(false);
         titleCol.setCellValueFactory(f -> new SimpleObjectProperty<>(f.getValue()));
         titleCol.setCellFactory(c -> new TableCell<>() {
             private HBox hBox = new HBox(12);
@@ -77,8 +89,8 @@ public class SongTable extends TableView<Song> {
                     titleLbl.setText(s.getTitle());
                     artistLbl.setText(s.getArtist());
                     if (listener.isCurrentSong(s)) {
-                        titleLbl.setTextFill(Color.web("#4a64e9ff"));
-                        animatePulse(titleLbl);
+                        titleLbl.setTextFill(Color.web("#FA2D48"));
+                        // animatePulse(titleLbl);
                     } else {
                         titleLbl.setTextFill(Color.WHITE);
                         stopPulse(titleLbl);
@@ -90,6 +102,7 @@ public class SongTable extends TableView<Song> {
         });
 
         TableColumn<Song, String> artCol = new TableColumn<>("ARTIST");
+        artCol.setSortable(false);
         artCol.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getArtist()));
         artCol.setCellFactory(column -> new TableCell<>() {
             @Override
@@ -102,8 +115,9 @@ public class SongTable extends TableView<Song> {
                 }
             }
         });
-        
+
         TableColumn<Song, String> durCol = new TableColumn<>("DURATION");
+        durCol.setSortable(false);
         durCol.setCellValueFactory(f -> new SimpleStringProperty(f.getValue().getDurationStr()));
         durCol.setMaxWidth(100);
         durCol.setCellFactory(column -> new TableCell<>() {
@@ -121,6 +135,7 @@ public class SongTable extends TableView<Song> {
         });
 
         TableColumn<Song, Song> likeCol = new TableColumn<>("LIKED");
+        likeCol.setSortable(false);
         likeCol.setCellValueFactory(f -> new SimpleObjectProperty<>(f.getValue()));
         likeCol.setMaxWidth(80);
         likeCol.setCellFactory(c -> new TableCell<>() {
@@ -128,7 +143,7 @@ public class SongTable extends TableView<Song> {
             private SVGPath heartFilled = new SVGPath();
             private StackPane heartBtn = new StackPane(heartOutline, heartFilled);
             {
-                double scale = 0.75; // 24 viewBox → 18px
+                double scale = 0.75;
                 heartOutline.setContent(HEART_PATH);
                 heartOutline.setFill(Color.TRANSPARENT);
                 heartOutline.setStroke(Color.web("#B3B3B3"));
@@ -168,8 +183,7 @@ public class SongTable extends TableView<Song> {
                 if (isLiked) {
                     heartFilled.setOpacity(1);
                     heartOutline.setStroke(Color.TRANSPARENT);
-                    DropShadow glow = new DropShadow(6, Color.web("#FA2D48"));
-                    heartFilled.setEffect(glow);
+                    heartFilled.setEffect(new DropShadow(6, Color.web("#FA2D48")));
                 } else {
                     heartFilled.setOpacity(0);
                     heartOutline.setStroke(Color.web("#B3B3B3"));
@@ -188,33 +202,31 @@ public class SongTable extends TableView<Song> {
                 }
             }
         });
-        
+
         getColumns().addAll(titleCol, artCol, durCol, likeCol);
         setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2 && getSelectionModel().getSelectedItem() != null)
+            if (e.getClickCount() == 1 && getSelectionModel().getSelectedItem() != null)
                 listener.onSongDoubleClick(getSelectionModel().getSelectedItem());
         });
     }
-    
-    private void animatePulse(Label l) {
-        Timeline pulse = (Timeline) l.getProperties().get("pulse");
-        if (pulse == null) {
-            pulse = new Timeline(
-                    new KeyFrame(Duration.ZERO, new KeyValue(l.opacityProperty(), 1.0)),
-                    new KeyFrame(Duration.seconds(1), new KeyValue(l.opacityProperty(), 0.6)),
-                    new KeyFrame(Duration.seconds(2), new KeyValue(l.opacityProperty(), 1.0))
-            );
-            pulse.setCycleCount(Timeline.INDEFINITE);
-            l.getProperties().put("pulse", pulse);
-        }
-        pulse.play();
-    }
-    
+
+    // private void animatePulse(Label l) {
+    //     Timeline pulse = (Timeline) l.getProperties().get("pulse");
+    //     if (pulse == null) {
+    //         pulse = new Timeline(
+    //                 new KeyFrame(Duration.ZERO, new KeyValue(l.opacityProperty(), 1.0)),
+    //                 new KeyFrame(Duration.seconds(1), new KeyValue(l.opacityProperty(), 0.6)),
+    //                 new KeyFrame(Duration.seconds(2), new KeyValue(l.opacityProperty(), 1.0))
+    //         );
+    //         pulse.setCycleCount(Timeline.INDEFINITE);
+    //         l.getProperties().put("pulse", pulse);
+    //     }
+    //     pulse.play();
+    // }
+
     private void stopPulse(Label l) {
         Timeline pulse = (Timeline) l.getProperties().get("pulse");
-        if (pulse != null) {
-            pulse.stop();
-        }
+        if (pulse != null) pulse.stop();
         l.setOpacity(1.0);
     }
 }

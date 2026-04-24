@@ -78,7 +78,7 @@ public class DatabaseService {
         return all.stream()
                 .filter(s -> s.lastPlayed > 0)
                 .sorted(Comparator.comparingLong((Song s) -> s.lastPlayed).reversed())
-                .limit(6)
+                .limit(9)  // show 9 recently played songs
                 .collect(Collectors.toList());
     }
 

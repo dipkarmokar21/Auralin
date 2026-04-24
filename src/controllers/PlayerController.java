@@ -19,6 +19,10 @@ public class PlayerController {
     private boolean isShuffle = false;
     private int repeatMode = 0;
     private Runnable onSongChange;
+    // CHANGED: separate callback for like toggles so views refresh live
+    private Runnable onLikeChange;
+    // Callback for play/pause state changes
+    private Runnable onPlayStateChange;
     
     public PlayerController(DatabaseService db, PlayerBar playerBar) {
         this.db = db;
@@ -27,6 +31,16 @@ public class PlayerController {
     
     public void setOnSongChange(Runnable callback) {
         this.onSongChange = callback;
+    }
+
+    /** Called when the like state changes — used to refresh views live */
+    public void setOnLikeChange(Runnable callback) {
+        this.onLikeChange = callback;
+    }
+    
+    /** Called when play/pause state changes — used to update play/pause icons */
+    public void setOnPlayStateChange(Runnable callback) {
+        this.onPlayStateChange = callback;
     }
     
     public void play(Song s) {
@@ -64,9 +78,11 @@ public class PlayerController {
             
             player.setOnEndOfMedia(() -> {
                 if (repeatMode == 1) {
+                    // Repeat ON — restart the same song
                     player.seek(Duration.ZERO);
                     player.play();
                 } else {
+                    // Repeat OFF — advance to next song
                     playNext();
                 }
             });
@@ -93,35 +109,37 @@ public class PlayerController {
             player.play();
             playerBar.updatePlayButton(true);
         }
+        
+        // Notify views to update play/pause icons
+        if (onPlayStateChange != null) {
+            Platform.runLater(onPlayStateChange);
+        }
     }
     
     public void playNext() {
-        ObservableList<Song> list = db.getAllSongs();
-        if (list.isEmpty()) return;
-        
-        int idx;
+        ObservableList<Song> allSongs = db.getAllSongs();
+        if (allSongs.isEmpty()) return;
+
+        int nextIndex;
         if (isShuffle) {
-            idx = new Random().nextInt(list.size());
+            // Pick a random song
+            nextIndex = new Random().nextInt(allSongs.size());
         } else {
-            idx = list.indexOf(db.getCurrent()) + 1;
-            if (idx >= list.size()) {
-                idx = (repeatMode == 2) ? 0 : list.size() - 1;
-            }
+            nextIndex = allSongs.indexOf(db.getCurrent()) + 1;
+            // Wrap around to first song if at the end
+            if (nextIndex >= allSongs.size()) nextIndex = 0;
         }
-        play(list.get(idx));
+        play(allSongs.get(nextIndex));
     }
-    
+
     public void playPrevious() {
-        ObservableList<Song> list = db.getAllSongs();
-        if (list.isEmpty()) return;
-        
-        int idx = list.indexOf(db.getCurrent());
-        if (idx == -1) idx = 1;
-        idx -= 1;
-        if (idx < 0) {
-            idx = (repeatMode == 2) ? list.size() - 1 : 0;
-        }
-        play(list.get(idx));
+        ObservableList<Song> allSongs = db.getAllSongs();
+        if (allSongs.isEmpty()) return;
+
+        int prevIndex = allSongs.indexOf(db.getCurrent()) - 1;
+        // Wrap around to last song if at the beginning
+        if (prevIndex < 0) prevIndex = allSongs.size() - 1;
+        play(allSongs.get(prevIndex));
     }
     
     public void seek(double position) {
@@ -148,8 +166,26 @@ public class PlayerController {
         Song s = db.getCurrent();
         if (s != null) {
             s.setLiked(!s.isLiked());
+            // CHANGED: update PlayerBar heart icon immediately
             playerBar.updateLoveButton(s.isLiked());
+            // CHANGED: fire onLikeChange so ViewManager can refresh the Liked view live
+            if (onLikeChange != null) Platform.runLater(onLikeChange);
         }
+    }
+
+    /**
+     * Called when a like is toggled from the SongTable (not the PlayerBar heart).
+     * Syncs the PlayerBar heart icon to match the song's current liked state.
+     */
+    public void syncLikeState(Song song) {
+        playerBar.updateLoveButton(song.isLiked());
+    }
+    
+    /**
+     * Returns true if a song is currently playing (not paused)
+     */
+    public boolean isPlaying() {
+        return player != null && player.getStatus() == MediaPlayer.Status.PLAYING;
     }
     
     private String formatTime(Duration d) {
