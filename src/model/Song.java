@@ -34,6 +34,8 @@ public class Song {
     }
 
     public void setDuration(Duration duration) { this.duration = duration; }
+    public double getDurationMs() { return duration == null ? 0 : duration.toMillis(); }
+    public void setDurationMs(long ms) { this.duration = Duration.millis(ms); }
     public boolean isLiked() { return liked; }
     public void setLiked(boolean liked) { this.liked = liked; }
     public void record() {

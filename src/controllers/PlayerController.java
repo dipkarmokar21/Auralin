@@ -166,9 +166,8 @@ public class PlayerController {
         Song s = db.getCurrent();
         if (s != null) {
             s.setLiked(!s.isLiked());
-            // CHANGED: update PlayerBar heart icon immediately
             playerBar.updateLoveButton(s.isLiked());
-            // CHANGED: fire onLikeChange so ViewManager can refresh the Liked view live
+            db.saveToDisk();
             if (onLikeChange != null) Platform.runLater(onLikeChange);
         }
     }

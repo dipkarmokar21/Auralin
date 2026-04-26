@@ -1,0 +1,21 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="Projectforoop:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/Projectforoop_jar</output-path>
+    <root id="archive" name="Projectforoop.jar">
+      <element id="module-output" name="Projectforoop" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/annotations-26.0.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/javafx-swt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/javafx.web.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/javafx.base.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/javafx.fxml.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/javafx.media.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/javafx.swing.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/jdk.jsobject.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/javafx.controls.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/javafx.graphics.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/jfx.incubator.input.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="D:/javafx/javafx-sdk-25.0.2/lib/jfx.incubator.richtext.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/mp3agic-0.9.1.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

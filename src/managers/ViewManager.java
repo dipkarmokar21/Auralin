@@ -54,6 +54,7 @@ public class ViewManager {
 
             @Override
             public void onLikeToggle(Song song) {
+                db.saveToDisk();
                 // If the toggled song is currently playing, update the heart in PlayerBar too
                 if (song == db.getCurrent()) {
                     playerController.syncLikeState(song);

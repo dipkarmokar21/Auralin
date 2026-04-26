@@ -3,6 +3,7 @@ package config;
 public class Constants {
 
     public static final String COLOR_RED       = "#FA2D48";
+    
     public static final String COLOR_GRAY_TEXT = "#B3B3B3";
     public static final String COLOR_BG_DARK   = "#121212";
     public static final String COLOR_BG_BLACK  = "#000000";

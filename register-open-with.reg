@@ -1,0 +1,23 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\AuralinPlayer]
+@="Auralin Music Player"
+
+[HKEY_CLASSES_ROOT\AuralinPlayer\DefaultIcon]
+@="C:\\Users\\Dip karmokar\\IdeaProjects\\Projectforoop\\AuralinPlayer.exe,0"
+
+[HKEY_CLASSES_ROOT\AuralinPlayer\shell\open\command]
+@="\"C:\\Users\\Dip karmokar\\IdeaProjects\\Projectforoop\\AuralinPlayer.exe\" \"%1\""
+
+[HKEY_CLASSES_ROOT\.mp3\OpenWithProgids]
+"AuralinPlayer"=""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\RegisteredApplications]
+"AuralinPlayer"="Software\\Clients\\Media\\AuralinPlayer\\Capabilities"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Clients\Media\AuralinPlayer\Capabilities]
+"ApplicationName"="Auralin Music Player"
+"ApplicationDescription"="Auralin Music Player"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Clients\Media\AuralinPlayer\Capabilities\FileAssociations]
+".mp3"="AuralinPlayer"

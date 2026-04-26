@@ -1,0 +1,136 @@
+\documentclass[12pt]{report}
+\usepackage[a4paper, left=3.17cm, right=3.17cm, top=2.54cm, bottom=2.54cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{chemformula}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{tabularx,booktabs}
+\newcolumntype{C}{>{\centering\arraybackslash}X} % centered version of "X" type
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+\usepackage{comment}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\usepackage{cite}
+\usepackage[colorlinks, linkcolor=black, anchorcolor=black, citecolor=black]{hyperref}
+\usepackage{graphicx}
+\setlength{\parskip}{0.5em}
+\title{Place Your Project Title at Here}
+%\author{\textup{Qi YUAN}}
+
+
+%copyright at footer
+\usepackage{fancyhdr}
+\fancyhf{}
+\rfoot{%
+  \footnotesize
+  \textcopyright~Dept. of Computer Science and Engineering, GUB\\
+
+ }
+%\pagestyle{fancy}
+
+
+\begin{document}
+    \input{title/title.tex}
+    \tableofcontents
+  
+
+
+% Chapter 1 starting here.....    
+\newpage
+\chapter{Introduction}
+
+\section{Overview}
+FileOrganizer is a software-based file management system designed to efficiently sort, organize, and search files within a computer directory.The system uses optimized algorithms such as Quick Sort, Merge Sort, Backtracking, and Recursion to provide high-performance file operations.With this system, users can quickly sort files by name or size, locate files in minimal time, and interact through a user-friendly Graphical User Interface (GUI). The project demonstrates how algorithmic techniques and modern software design can replace traditional manual file searching, making file management faster, more reliable, and more automated.
+
+\section{Motivation}
+The primary motivation behind developing this project is the increasing need for fast and automated file management. Traditional file search and sorting methods are often slow, error-prone, and inefficient, especially when dealing with large directories.
+By implementing an automated FileOrganizer system,users gain a smoother experience through:
+\begin{itemize}
+    \item Faster file searching.
+    \item Automatic sorting,
+    \item Reduced manual effort.
+    \item Optimized performance using advanced algorithms.
+\end{itemize}
+
+
+\section{Problem Definition}
+
+\subsection{Problem Statement}
+Manual file sorting and searching often lead to inefficiency, difficulty handling large file sets, slow results, and poor user experience. Traditional systems lack algorithmic optimization, causing delays in locating files or organizing them properly.
+Therefore, an automated FileOrganizer system is required to:
+\begin{itemize}
+    \item Streamline the file-management process.
+    \item Reduce unnecessary time consumption.
+    \item Provide accurate results.
+    \item Improve the overall experience of managing files.
+\end{itemize}
+
+\subsection{Complex Engineering Problem}
+The following Table \ref{tab:CEP} summarizes the attributes addressed in the project.
+
+\begin{table}[htbp]
+   \centering
+    \caption{Summary of the attributes touched by the project}
+    \begin{tabular}{|p{6.0 cm}|p{8 cm}|}
+    \toprule
+        \textbf{Name of the Attributes} & \textbf{Explain how to address}  \\
+        \midrule
+
+    \textbf{P1:} Depth of knowledge required  & Requires understanding of algorithms (Quick Sort, Merge Sort), data structures, recursion, backtracking, and GUI development. \\
+      \hline
+       
+    \textbf{P2:} Range of conflicting requirements  & Balancing high performance (speed) with user-friendliness, memory usage, and system resource constraints. \\
+      \hline
+
+    \textbf{P3:} Depth of analysis required  & Requires analyzing file patterns, directory structures, algorithmic behavior, and performance optimization. \\
+    \hline
+    
+    \textbf{P4:} Familiarity of issues  & Addresses common issues such as slow file searching, inefficient sorting, and inconsistent file organization. \\ 
+    \hline
+    \textbf{P5:} Extent of applicable codes  & Involves applying coding standards, algorithmic rules, and proper documentation practices. \\
+      \hline
+       
+    \textbf{P6:} Extent of stakeholder involvement and conflicting requirements  & Users may prefer simplicity while developers may aim for feature-rich functionalities, creating design conflicts. \\
+      \hline
+
+    \textbf{P7:} Interdependence  & Strong interdependence among sorting modules, searching algorithms, GUI components, and file-handling operations. \\
+    \hline
+        
+    \end{tabular}
+    \label{tab:CEP}
+\end{table}
+
+\section{Design Goals/Objectives}
+The main objectives of this project are:
+\begin{itemize}
+    \item To develop an efficient and reliable file-management system.
+    \item To minimize errors and delays associated with manual file operations.
+    \item To provide fast sorting and searching using optimized algorithms.
+    \item To offer a clean and user-friendly graphical interface.
+    \item To ensure consistent performance even with large numbers of files.
+\end{itemize}
+
+\section{Application}
+This system can be applied in personal computers, office environments, development workflows, and any scenario where file organization is needed.
+
+Real-world applications include:
+\begin{itemize}
+    \item Automated directory management.
+    \item Academic or professional file sorting.
+    \item Developer workflow optimization.
+    \item Quick retrieval of frequently used files.
+    \item System utility tools.
+\end{itemize}
+By implementing this system, users can experience faster operations, improved organization, and enhanced productivity.
+
+% Chapter 1 ends here.....    
+
+
+
+
+
+
+\end{document}

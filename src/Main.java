@@ -36,7 +36,12 @@ public class Main extends Application {
     private double resizeStartX, resizeStartY, resizeStartW, resizeStartH, resizeStartSX, resizeStartSY;
     private static final int RESIZE_MARGIN = 6;
 
-    public static void main(String[] args) { launch(args); }
+    private static String[] appArgs;
+
+    public static void main(String[] args) {
+        appArgs = args;
+        launch(args);
+    }
 
     @Override
     public void start(Stage stage) {
@@ -91,8 +96,27 @@ public class Main extends Application {
         sidebar = new Sidebar(view -> viewManager.showView(view));
         viewManager.showView("Home");
 
-        // Auto-scan music folders on startup
-        fileImportService.autoScan(() -> viewManager.refreshCurrentView());
+        // Auto-scan disabled
+
+        // "Open with" support — if launched with a file argument, load and play it
+        if (appArgs != null && appArgs.length > 0) {
+            java.io.File argFile = new java.io.File(appArgs[0]);
+            if (argFile.exists() && argFile.getName().toLowerCase().endsWith(".mp3")) {
+                javafx.application.Platform.runLater(() -> {
+                    db.addFile(argFile);
+                    viewManager.showView("Library");
+                    // small delay to let MediaPlayer load duration
+                    javafx.animation.PauseTransition delay = new javafx.animation.PauseTransition(javafx.util.Duration.millis(800));
+                    delay.setOnFinished(e -> {
+                        db.getAllSongs().stream()
+                            .filter(s -> s.getFilePath().equals(argFile.getAbsolutePath()))
+                            .findFirst()
+                            .ifPresent(playerController::play);
+                    });
+                    delay.play();
+                });
+            }
+        }
 
         BorderPane titleBar = createTitleBar(stage);
 
@@ -102,15 +126,18 @@ public class Main extends Application {
         innerLayout.setCenter(contentArea);
 
         upperStack.getChildren().add(innerLayout);
+        upperStack.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         BorderPane outerLayout = new BorderPane();
         outerLayout.setTop(titleBar);
         outerLayout.setCenter(upperStack);
         outerLayout.setBottom(playerBar);
         outerLayout.setStyle("-fx-background-color: #000000;");
+        outerLayout.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         // Wrap in StackPane with rounded corners + border
         StackPane root = new StackPane(outerLayout);
+        root.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         root.setStyle(
             "-fx-background-color: #000000;" +
             "-fx-background-radius: 10;" +
@@ -119,7 +146,12 @@ public class Main extends Application {
             "-fx-border-radius: 10;"
         );
 
-        Scene scene = new Scene(root, 1250, 850);
+        // Screen-aware sizing
+        javafx.geometry.Rectangle2D screenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
+        double winW = Math.min(1250, screenBounds.getWidth() - 20);
+        double winH = Math.min(850, screenBounds.getHeight() - 20);
+
+        Scene scene = new Scene(root, winW, winH);
         scene.setFill(javafx.scene.paint.Color.TRANSPARENT);
         applyGlobalStyles(scene);
 
@@ -128,13 +160,18 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.setMinWidth(600);
         stage.setMinHeight(400);
+        stage.setWidth(winW);
+        stage.setHeight(winH);
+        stage.setX((screenBounds.getWidth() - winW) / 2);
+        stage.setY((screenBounds.getHeight() - winH) / 2);
 
         // ── Resize: 8 edge/corner panes laid over root ────────────────────────
         setupResize(root, scene, stage);
 
+        // Load taskbar icon
         try {
-            java.io.InputStream icon =
-                getClass().getResourceAsStream("/resources/9973171-Photoroom.png");
+            java.io.InputStream icon = getClass().getResourceAsStream("/resources/appicon.png");
+            if (icon == null) icon = getClass().getResourceAsStream("/resources/9973171-Photoroom.png");
             if (icon != null) stage.getIcons().add(new javafx.scene.image.Image(icon));
         } catch (Exception ignored) {}
 
@@ -279,6 +316,10 @@ public class Main extends Application {
         titleBar.setRight(right);
         titleBar.setStyle("-fx-background-color: #000000; -fx-padding: 0 0 0 10; -fx-background-radius: 10 10 0 0;");
         titleBar.setPrefHeight(32);
+        titleBar.setMinHeight(32);
+        titleBar.setMaxHeight(32);
+        titleBar.setVisible(true);
+        titleBar.setManaged(true);
         BorderPane.setAlignment(left, javafx.geometry.Pos.CENTER_LEFT);
         BorderPane.setAlignment(right, javafx.geometry.Pos.CENTER_RIGHT);
 
@@ -399,5 +440,5 @@ public class Main extends Application {
         }
     }
     @Override
-    public void stop() { playerController.dispose(); }
+    public void stop() { playerController.dispose(); db.saveToDisk(); db.shutdown(); }
 }
