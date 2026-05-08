@@ -89,6 +89,11 @@ public class PlayerBar extends HBox {
         setAlignment(Pos.CENTER);
         setStyle("-fx-background-color: #000000; -fx-border-color: #282828; -fx-border-width: 1 0 0 0;");
         setPrefHeight(120);
+        setMinHeight(120);
+        
+        // Make the PlayerBar responsive
+        setMinWidth(800); // Minimum width to prevent layout issues
+        
         getChildren().addAll(buildInfoSection(), buildCenterSection(), buildVolumeSection());
     }
 
@@ -191,6 +196,19 @@ public class PlayerBar extends HBox {
         Button btnNext = createIconBtn("⏭", 20);
         btnRepeatRef  = createIconBtn("🔁", 18);
 
+        // Make buttons more responsive - set minimum widths and prevent text overflow
+        btnShuffleRef.setMinWidth(45);
+        btnShuffleRef.setPrefWidth(45);
+        
+        btnPrev.setMinWidth(45);
+        btnPrev.setPrefWidth(45);
+        
+        btnNext.setMinWidth(45);
+        btnNext.setPrefWidth(45);
+        
+        btnRepeatRef.setMinWidth(45);
+        btnRepeatRef.setPrefWidth(45);
+
         // ── CHANGED: premium SVG play/pause button ────────────────────────────
         // Uses an SVG path inside a white circle instead of a plain text button
         SVGPath playIcon = new SVGPath();
@@ -206,10 +224,11 @@ public class PlayerBar extends HBox {
 
         StackPane playBtn = new StackPane(playCircleBg, playIcon);
         playBtn.setPrefSize(44, 44);
+        playBtn.setMinSize(44, 44);
+        playBtn.setMaxSize(44, 44);
         playBtn.setStyle("-fx-cursor: hand;");
         playBtn.setOnMouseClicked(e -> listener.onPlayPause());
         // Subtle scale on hover
-        playBtn.setOnMouseEntered(e -> playBtn.setScaleX(1.08));
         playBtn.setOnMouseEntered(e -> { playBtn.setScaleX(1.08); playBtn.setScaleY(1.08); });
         playBtn.setOnMouseExited(e ->  { playBtn.setScaleX(1.0);  playBtn.setScaleY(1.0);  });
 
@@ -250,8 +269,9 @@ public class PlayerBar extends HBox {
             listener.onRepeat(repeatEnabled ? 1 : 0);
         });
 
-        HBox controls = new HBox(20, btnShuffleRef, btnPrev, playBtn, btnNext, btnRepeatRef);
+        HBox controls = new HBox(12, btnShuffleRef, btnPrev, playBtn, btnNext, btnRepeatRef);
         controls.setAlignment(Pos.CENTER);
+        controls.setMinWidth(280); // Ensure minimum width for controls
         return controls;
     }
 
@@ -308,6 +328,9 @@ public class PlayerBar extends HBox {
         Button btn = new Button(icon);
         btn.getStyleClass().add("control-icon");
         btn.setStyle("-fx-font-size: " + fontSize + "px;");
+        // Prevent text overflow and ensure button maintains its size
+        btn.setTextOverrun(OverrunStyle.CLIP);
+        btn.setWrapText(false);
         return btn;
     }
 

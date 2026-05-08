@@ -57,6 +57,8 @@ public class Main extends Application {
             } else {
                 viewManager.refreshCurrentView();
             }
+            // CHANGED: refresh Home content to update recently played list
+            viewManager.refreshHomeContent();
             // CHANGED: always refresh Home cards so icon updates live from any view
             viewManager.refreshHomeCards();
             if (isNowPlayingOpen()) nowPlayingView.updateSong(db.getCurrent());
@@ -81,6 +83,7 @@ public class Main extends Application {
         });
 
         viewManager = new ViewManager(db, contentArea, userName, playerController);
+        viewManager.setHostServices(getHostServices());
         viewManager.setFileImportCallback(new ViewManager.FileImportCallback() {
             @Override public void onAddFiles() { fileImportService.importFiles(); }
             @Override public void onAddFolder() {
@@ -297,6 +300,12 @@ public class Main extends Application {
         btnMax.setOnAction(e -> {
             animateBtn(btnMax);
             stage.setMaximized(!stage.isMaximized());
+            // Update button icon based on maximized state
+            if (stage.isMaximized()) {
+                btnMax.setText("🗗"); // Restore down icon
+            } else {
+                btnMax.setText("⬜"); // Maximize icon
+            }
         });
         btnClose.setOnAction(e -> {
             animateBtn(btnClose);

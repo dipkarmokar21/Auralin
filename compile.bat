@@ -6,7 +6,7 @@ REM Create output directory
 if not exist "out" mkdir out
 
 REM Compile all Java files
-javac -cp "lib/*;src" -d out ^
+javac --module-path "D:\javafx\javafx-sdk-25.0.2\lib" --add-modules javafx.controls,javafx.media,javafx.swing -cp "C:\Users\Dip karmokar\Downloads\mp3agic-0.9.1.jar;lib/*;src" -d out ^
     src/Main.java ^
     src/components/PlayerBar.java ^
     src/components/Sidebar.java ^
@@ -16,6 +16,7 @@ javac -cp "lib/*;src" -d out ^
     src/views/LibraryView.java ^
     src/views/LikedView.java ^
     src/views/NowPlayingView.java ^
+    src/views/AboutView.java ^
     src/ui/SongTable.java ^
     src/model/Song.java ^
     src/services/DatabaseService.java ^
@@ -29,7 +30,9 @@ if %errorlevel% equ 0 (
     echo ✓ Compilation successful!
     REM Copy resources to out folder
     if not exist "out\resources" mkdir out\resources
-    xcopy /Y /Q "src\resources\*" "out\resources\" >nul
+    xcopy /Y /Q "src\resources\*" "out\resources\" >nul 2>&1
+    if not exist "out\Assets" mkdir out\Assets
+    xcopy /Y /Q "src\Assets\*" "out\Assets\" >nul 2>&1
     echo.
     echo To run the application, use:
     echo java -cp "lib/*;out" Main

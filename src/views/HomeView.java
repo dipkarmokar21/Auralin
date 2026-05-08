@@ -84,4 +84,22 @@ public class HomeView extends VBox {
         }
         return grid;
     }
+
+    /**
+     * Updates play/pause icons on all MusicCards when play state changes
+     */
+    public void refreshPlayIcons() {
+        if (recentGrid != null) {
+            recentGrid.getChildren().stream()
+                .filter(node -> node instanceof MusicCard)
+                .map(node -> (MusicCard) node)
+                .forEach(MusicCard::updatePlayIcon);
+        }
+        if (recommendGrid != null) {
+            recommendGrid.getChildren().stream()
+                .filter(node -> node instanceof MusicCard)
+                .map(node -> (MusicCard) node)
+                .forEach(MusicCard::updatePlayIcon);
+        }
+    }
 }

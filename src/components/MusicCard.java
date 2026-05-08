@@ -70,39 +70,59 @@ public class MusicCard extends VBox {
         imgBox.setStyle("-fx-background-color: #2a2a2a; -fx-background-radius: 12;");
 
         // Premium red circle play/pause icon at bottom-right corner
-        if (listener.isCurrentSong(song)) {
-            Circle playBg = new Circle(22, Color.web(Constants.COLOR_RED));
-            playBg.setMouseTransparent(true);
+        // Create the icon but initially hide it if not current song
+        Circle playBg = new Circle(22, Color.web(Constants.COLOR_RED));
 
-            iconPath = new SVGPath();
-            iconPath.setFill(Color.WHITE);
-            iconPath.setMouseTransparent(true);
-            
-            // Set initial icon based on playing state (no animation on first load)
-            boolean isPlaying = listener.isPlaying(song);
-            if (isPlaying) {
-                // Pause icon (two vertical bars)
-                iconPath.setContent("M6 4h4v16H6V4zm8 0h4v16h-4V4z");
-            } else {
-                // Play icon (triangle)
-                iconPath.setContent("M8 5v14l11-7z");
-            }
-            iconPath.setScaleX(0.8);
-            iconPath.setScaleY(0.8);
-
-            playPauseOverlay = new StackPane(playBg, iconPath);
-            playPauseOverlay.setMouseTransparent(true);
-            playPauseOverlay.setPrefSize(44, 44);
-            playPauseOverlay.setMaxSize(44, 44);
-            playPauseOverlay.setMinSize(44, 44);
-
-            // Position at bottom-right corner of imgBox - using translateX/Y for precise positioning
-            StackPane.setAlignment(playPauseOverlay, Pos.BOTTOM_RIGHT);
-            playPauseOverlay.setTranslateX(8);  // Move 8px to the right (half of circle size)
-            playPauseOverlay.setTranslateY(8);  // Move 8px down (half of circle size)
-            
-            imgBox.getChildren().add(playPauseOverlay);
+        iconPath = new SVGPath();
+        iconPath.setFill(Color.WHITE);
+        
+        // Set initial icon based on playing state
+        boolean isCurrentSong = listener.isCurrentSong(song);
+        boolean isPlaying = isCurrentSong && listener.isPlaying(song);
+        
+        if (isPlaying) {
+            // Pause icon (two vertical bars)
+            iconPath.setContent("M6 4h4v16H6V4zm8 0h4v16h-4V4z");
+        } else {
+            // Play icon (triangle)
+            iconPath.setContent("M8 5v14l11-7z");
         }
+        iconPath.setScaleX(0.8);
+        iconPath.setScaleY(0.8);
+
+        playPauseOverlay = new StackPane(playBg, iconPath);
+        playPauseOverlay.setPrefSize(44, 44);
+        playPauseOverlay.setMaxSize(44, 44);
+        playPauseOverlay.setMinSize(44, 44);
+        
+        // Show/hide based on whether this is the current song
+        playPauseOverlay.setVisible(isCurrentSong);
+        
+        // Make the overlay clickable for play/pause
+        playPauseOverlay.setOnMouseClicked(e -> {
+            e.consume(); // Prevent card click
+            listener.onCardClick(song); // This will toggle play/pause
+        });
+        
+        // Add hover effect to the play button
+        playPauseOverlay.setOnMouseEntered(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(100), playPauseOverlay);
+            st.setToX(1.1); st.setToY(1.1);
+            st.play();
+        });
+        
+        playPauseOverlay.setOnMouseExited(e -> {
+            ScaleTransition st = new ScaleTransition(Duration.millis(100), playPauseOverlay);
+            st.setToX(1.0); st.setToY(1.0);
+            st.play();
+        });
+
+        // Position at bottom-right corner of imgBox - using translateX/Y for precise positioning
+        StackPane.setAlignment(playPauseOverlay, Pos.BOTTOM_RIGHT);
+        playPauseOverlay.setTranslateX(8);  // Move 8px to the right (half of circle size)
+        playPauseOverlay.setTranslateY(8);  // Move 8px down (half of circle size)
+        
+        imgBox.getChildren().add(playPauseOverlay);
 
         // ── Song title ────────────────────────────────────────────────────────
         Label lblTitle = new Label(song.getTitle());
@@ -135,6 +155,29 @@ public class MusicCard extends VBox {
 
         setOnMouseEntered(e -> hoverIn.playFromStart());
         setOnMouseExited(e -> hoverOut.playFromStart());
+    }
+
+    /**
+     * Updates the play/pause icon visibility and content based on current song state
+     */
+    public void updatePlayIcon() {
+        if (playPauseOverlay != null && iconPath != null) {
+            boolean isCurrentSong = listener.isCurrentSong(song);
+            
+            // Show/hide the icon based on whether this is the current song
+            playPauseOverlay.setVisible(isCurrentSong);
+            
+            if (isCurrentSong) {
+                boolean isPlaying = listener.isPlaying(song);
+                if (isPlaying) {
+                    // Pause icon (two vertical bars)
+                    iconPath.setContent("M6 4h4v16H6V4zm8 0h4v16h-4V4z");
+                } else {
+                    // Play icon (triangle)
+                    iconPath.setContent("M8 5v14l11-7z");
+                }
+            }
+        }
     }
 
 }

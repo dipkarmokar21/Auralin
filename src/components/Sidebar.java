@@ -55,12 +55,13 @@ public class Sidebar extends VBox {
 
     private void updateNavButtons() {
         navButtons.getChildren().clear();
-        // ORDER: Home → Search → Your Library → Liked Songs (directly below Library)
+        // ORDER: Home → Search → Your Library → Liked Songs → About
         navButtons.getChildren().addAll(
             createNavBtn("Home",         "🏠", activeView.equals("Home"),    e -> navigate("Home")),
             createNavBtn("Search",       "🔍", activeView.equals("Search"),  e -> navigate("Search")),
             createNavBtn("Your Library", "📚", activeView.equals("Library"), e -> navigate("Library")),
-            createNavBtnWithSvgHeart("Liked Songs",           activeView.equals("Liked"),  e -> navigate("Liked"))
+            createNavBtnWithSvgHeart("Liked Songs",           activeView.equals("Liked"),  e -> navigate("Liked")),
+            createNavBtnWithSvgInfo("About",                  activeView.equals("About"),  e -> navigate("About"))
         );
     }
 
@@ -147,6 +148,65 @@ public class Sidebar extends VBox {
         return btn;
     }
 
+    /**
+     * About nav button — SVG info icon instead of emoji.
+     * Similar to heart button with hover effects
+     */
+    private Button createNavBtnWithSvgInfo(String text, boolean isActive,
+                                           javafx.event.EventHandler<javafx.event.ActionEvent> event) {
+        SVGPath infoIcon = new SVGPath();
+        infoIcon.setContent(loadInfoSvgPath());
+        infoIcon.setMouseTransparent(true);
+
+        Color activeColor  = Color.web("#FA2D48");
+        Color normalColor  = Color.web(Constants.COLOR_GRAY_TEXT);
+        Color hoverColor   = Color.WHITE;
+
+        if (isActive) {
+            infoIcon.setFill(activeColor);
+            infoIcon.setStroke(Color.TRANSPARENT);
+        } else {
+            infoIcon.setFill(normalColor);
+            infoIcon.setStroke(Color.TRANSPARENT);
+        }
+
+        infoIcon.setScaleX(16.0 / 50.0); // Scale from 50x50 to 16x16
+        infoIcon.setScaleY(16.0 / 50.0);
+
+        StackPane iconBox = new StackPane(infoIcon);
+        iconBox.setPrefSize(20, 20);
+        iconBox.setMinSize(20, 20);
+
+        Label lblText = new Label(" " + text);
+        lblText.setTextFill(isActive ? activeColor : normalColor);
+        lblText.setFont(Font.font("System", FontWeight.BOLD, 16));
+        lblText.setMouseTransparent(true);
+
+        HBox content = new HBox(2, iconBox, lblText);
+        content.setAlignment(Pos.CENTER_LEFT);
+
+        Button btn = new Button();
+        btn.setGraphic(content);
+        btn.getStyleClass().add("nav-btn");
+        btn.setOnAction(event);
+        btn.setMaxWidth(Double.MAX_VALUE);
+        btn.setAlignment(Pos.CENTER_LEFT);
+
+        // Manual hover effects
+        if (!isActive) {
+            btn.setOnMouseEntered(e -> {
+                lblText.setTextFill(hoverColor);
+                infoIcon.setFill(hoverColor);
+            });
+            btn.setOnMouseExited(e -> {
+                lblText.setTextFill(normalColor);
+                infoIcon.setFill(normalColor);
+            });
+        }
+
+        return btn;
+    }
+
     private void navigate(String view) {
         activeView = view;
         updateNavButtons();
@@ -171,6 +231,19 @@ public class Sidebar extends VBox {
     private static String loadHeartSvgPath() {
         try {
             java.io.InputStream is = Sidebar.class.getResourceAsStream("/resources/heart.svg");
+            if (is == null) return "";
+            String xml = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("d=\"([^\"]+)\"").matcher(xml);
+            return m.find() ? m.group(1) : "";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** Reads the SVG info path from Assets/info.svg */
+    private static String loadInfoSvgPath() {
+        try {
+            java.io.InputStream is = Sidebar.class.getResourceAsStream("/Assets/info.svg");
             if (is == null) return "";
             String xml = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
             java.util.regex.Matcher m = java.util.regex.Pattern.compile("d=\"([^\"]+)\"").matcher(xml);

@@ -18,6 +18,10 @@ public class ViewManager {
     private String userName;
     private PlayerController playerController;
     private FileImportCallback fileImportCallback;
+    private javafx.application.HostServices hostServices;
+    
+    // Cache the HomeView to prevent rebuilding and losing icon states
+    private views.HomeView cachedHomeView;
 
 
 
@@ -35,6 +39,10 @@ public class ViewManager {
     
     public void setFileImportCallback(FileImportCallback callback) {
         this.fileImportCallback = callback;
+    }
+    
+    public void setHostServices(javafx.application.HostServices hostServices) {
+        this.hostServices = hostServices;
     }
     
     public void showView(String view) {
@@ -69,7 +77,13 @@ public class ViewManager {
         MusicCard.MusicCardListener cardListener = new MusicCard.MusicCardListener() {
             @Override
             public void onCardClick(Song song) {
-                playerController.play(song);
+                // If clicking on the currently loaded song, toggle play/pause
+                if (song == db.getCurrent()) {
+                    playerController.togglePlay();
+                } else {
+                    // Otherwise, play the new song
+                    playerController.play(song);
+                }
             }
             
             @Override
@@ -85,9 +99,11 @@ public class ViewManager {
         
         switch (view) {
             case "Home":
-                HomeView homeView = new HomeView(userName, cardListener);
-                homeView.setContent(db.getRecentlyPlayed(), db.getRecommendations());
-                viewContent = homeView;
+                if (cachedHomeView == null) {
+                    cachedHomeView = new views.HomeView(userName, cardListener);
+                    cachedHomeView.setContent(db.getRecentlyPlayed(), db.getRecommendations());
+                }
+                viewContent = cachedHomeView;
                 break;
             case "Search":
                 viewContent = new SearchView(db.getAllSongs(), tableListener);
@@ -108,6 +124,9 @@ public class ViewManager {
             case "Liked":
                 viewContent = new LikedView(db.getLikedSongs(), tableListener);
                 break;
+            case "About":
+                viewContent = new AboutView(hostServices);
+                break;
         }
         
         if (viewContent != null) {
@@ -124,7 +143,12 @@ public class ViewManager {
     }
     
     public void refreshCurrentView() {
-        showView(activeView);
+        if (activeView.equals("Home")) {
+            // For Home view, just refresh the icons, don't rebuild
+            refreshHomeCards();
+        } else {
+            showView(activeView);
+        }
     }
 
     /**
@@ -133,10 +157,35 @@ public class ViewManager {
      * even when the user is on Library/Search/Liked view.
      */
     public void refreshHomeCards() {
-        if (activeView.equals("Home")) {
-            showView("Home");
+        if (activeView.equals("Home") && cachedHomeView != null) {
+            // Just refresh the play icons without rebuilding
+            cachedHomeView.refreshPlayIcons();
         }
-        // If not on Home, the next time user navigates to Home it will rebuild with correct state
+        // If not on Home, the icons will be correct when user navigates back
+    }
+    
+    /**
+     * Forces a complete rebuild of the Home view (when songs are added/removed)
+     */
+    public void rebuildHomeView() {
+        cachedHomeView = null; // Clear cache to force rebuild
+        if (activeView.equals("Home")) {
+            showView("Home"); // This will create a new HomeView
+        }
+    }
+    
+    /**
+     * Refreshes the HomeView content (recently played, recommendations) without losing icon states
+     */
+    public void refreshHomeContent() {
+        if (cachedHomeView != null) {
+            // Update the content with fresh data
+            cachedHomeView.setContent(db.getRecentlyPlayed(), db.getRecommendations());
+        }
+        if (activeView.equals("Home")) {
+            // If currently viewing Home, refresh the display
+            refreshHomeCards();
+        }
     }
 
     private void styleScrollBars(ScrollPane scroll) {

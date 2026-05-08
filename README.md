@@ -77,20 +77,37 @@ Auralin follows the **MVC pattern** with additional design patterns:
 
 ---
 
-## Building from Source
+## Setup Instructions
 
 ### Prerequisites
 - JDK 25 (Amazon Corretto 25 recommended)
-- JavaFX SDK 25.0.2 at `C:\javafx\javafx-sdk-25.0.2`
-- mp3agic 0.9.1 jar at `C:\Users\<user>\Downloads\mp3agic-0.9.1.jar`
+- [JavaFX SDK 25.0.2](https://gluonhq.com/products/javafx/) - Download from Gluon
+- [mp3agic 0.9.1](https://repo1.maven.org/maven2/com/mpatric/mp3agic/0.9.1/) - Download JAR
 
-### Compile & Run
+### IDE Setup (IntelliJ IDEA)
+
+1. **Add Libraries:**
+   - Go to `File → Project Structure → Libraries`
+   - Click `+` and select `Java`
+   - Add `mp3agic.jar`
+   - Add JavaFX SDK lib folder (e.g., `C:\Users\Dip\3D Objects\javafx\javafx-sdk-25.0.2\lib`)
+
+2. **Configure Run Configuration:**
+   - Go to `Run → Edit Configurations`
+   - Add VM options:
+     ```
+     --module-path "C:\Users\Dip\3D Objects\javafx\javafx-sdk-25.0.2\lib" --add-modules javafx.controls,javafx.fxml,javafx.media
+     ```
+
+### Building from Source
+
+#### Compile & Run
 ```bat
 compile.bat
 run.bat
 ```
 
-### Build Full Installer
+#### Build Full Installer
 ```bat
 build-all.bat
 ```
@@ -107,8 +124,10 @@ This will:
 
 Library data is saved at:
 ```
-%APPDATA%\AuralinPlayer\library.dat
+%APPDATA% → Auralin Player → library.dat
 ```
+
+This is the database location where all your music library information is stored.
 
 Format (pipe-separated):
 ```
@@ -122,6 +141,28 @@ filePath|liked|plays|lastPlayed|artist|durationMs
 ```bat
 java --module-path "C:\javafx\javafx-sdk-25.0.2\lib" --add-modules javafx.controls,javafx.media,javafx.swing -jar AuralinPlayer.jar
 ```
+
+---
+
+## About
+
+### Version
+**Auralin Music Player v1.0.0**
+
+### Credits
+
+**Developer:** Dip Karmokar  
+GitHub: [https://github.com/dipkarmokar21/](https://github.com/dipkarmokar21/)
+
+**Structure Design:** Sekon Karmokar  
+GitHub: [https://github.com/sekon-karmokar](https://github.com/sekon-karmokar)
+
+### Dependencies
+- **[JavaFX 25.0.2](https://gluonhq.com/products/javafx/)** - UI Framework
+- **[mp3agic 0.9.1](https://github.com/mpatric/mp3agic/releases/tag/v0.9.1)** - Audio Metadata Processing
+
+### Check for Updates
+The application includes an update checker feature (currently displays update check interface - backend update system not implemented).
 
 ---
 
