@@ -21,7 +21,8 @@ public class AboutView extends VBox {
     }
 
     private void setupUI() {
-        setPadding(new Insets(40, 60, 40, 60));
+        // Responsive padding based on screen size
+        setPadding(new Insets(50, 100, 50, 100));
         setStyle("-fx-background-color: " + Constants.BG_BLACK + ";");
 
         // App Title
@@ -72,16 +73,66 @@ public class AboutView extends VBox {
             "https://github.com/mpatric/mp3agic/releases/tag/v0.9.1"
         );
 
-        // Check for Updates Button
-        Button updateButton = new Button("Check for Updates");
-        updateButton.setFont(Font.font("System", FontWeight.BOLD, 14));
+        // Check for Updates Button with premium design and refresh icon
+        Button updateButton = new Button();
+        
+        // Create refresh SVG icon
+        javafx.scene.shape.SVGPath refreshIcon = new javafx.scene.shape.SVGPath();
+        refreshIcon.setContent("M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15");
+        refreshIcon.setFill(Color.WHITE);
+        refreshIcon.setScaleX(1.2);
+        refreshIcon.setScaleY(1.2);
+        refreshIcon.setStroke(Color.WHITE);
+        refreshIcon.setStrokeWidth(1.5);
+        
+        javafx.scene.layout.StackPane iconContainer = new javafx.scene.layout.StackPane(refreshIcon);
+        iconContainer.setPrefSize(20, 20);
+        
+        Label buttonText = new Label("  Check for Updates");
+        buttonText.setTextFill(Color.WHITE);
+        buttonText.setFont(Font.font("System", FontWeight.BOLD, 16));
+        
+        javafx.scene.layout.HBox buttonContent = new javafx.scene.layout.HBox(8, iconContainer, buttonText);
+        buttonContent.setAlignment(javafx.geometry.Pos.CENTER);
+        
+        updateButton.setGraphic(buttonContent);
+        updateButton.setPrefWidth(280);
+        updateButton.setPrefHeight(55);
         updateButton.setStyle(
-            "-fx-background-color: " + "#ffffffff" + ";" +
-            "-fx-text-fill: black;" +
-            "-fx-background-radius: 20;" +
-            "-fx-padding: 10 20;" +
-            "-fx-cursor: hand;"
+            "-fx-background-color: linear-gradient(to bottom, #007acc, #005a9e);" +
+            "-fx-background-radius: 25;" +
+            "-fx-border-color: #005a9e;" +
+            "-fx-border-width: 2;" +
+            "-fx-border-radius: 25;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0,122,204,0.4), 15, 0, 0, 5);"
         );
+        
+        // Add premium hover animation
+        updateButton.setOnMouseEntered(e -> {
+            updateButton.setStyle(
+                "-fx-background-color: linear-gradient(to bottom, #1e88e5, #007acc);" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #007acc;" +
+                "-fx-border-width: 2;" +
+                "-fx-border-radius: 25;" +
+                "-fx-cursor: hand;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,122,204,0.6), 20, 0, 0, 8);"
+            );
+        });
+        
+        updateButton.setOnMouseExited(e -> {
+            updateButton.setStyle(
+                "-fx-background-color: linear-gradient(to bottom, #007acc, #005a9e);" +
+                "-fx-background-radius: 25;" +
+                "-fx-border-color: #005a9e;" +
+                "-fx-border-width: 2;" +
+                "-fx-border-radius: 25;" +
+                "-fx-cursor: hand;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,122,204,0.4), 15, 0, 0, 5);"
+            );
+        });
+        
         updateButton.setOnAction(e -> showUpdateDialog());
 
         // Copyright
@@ -89,41 +140,109 @@ public class AboutView extends VBox {
         copyright.setFont(Font.font("System", FontWeight.NORMAL, 12));
         copyright.setTextFill(Color.web(Constants.COLOR_GRAY_TEXT));
 
-        // Layout
-        VBox creditsSection = new VBox(15, creditsTitle, developerBox, designerBox);
-        VBox dependenciesSection = new VBox(15, dependenciesTitle, javafxBox, mp3agicBox);
+        // Layout with better spacing and organization - RESPONSIVE CONTAINER
+        VBox contentContainer = new VBox();
+        contentContainer.setAlignment(Pos.TOP_CENTER);
+        contentContainer.setMaxWidth(1000); // Max width for large screens
+        contentContainer.setMinWidth(600);  // Min width for small screens
         
-        HBox updateSection = new HBox(updateButton);
+        VBox titleSection = new VBox(10);
+        titleSection.setAlignment(Pos.CENTER);
+        titleSection.getChildren().addAll(appTitle, version);
+        
+        VBox creditsSection = new VBox(20);
+        creditsSection.setPadding(new Insets(20, 0, 20, 0));
+        creditsSection.getChildren().addAll(creditsTitle, developerBox, designerBox);
+        
+        VBox dependenciesSection = new VBox(20);
+        dependenciesSection.setPadding(new Insets(20, 0, 20, 0));
+        
+        // Dependencies in horizontal layout for better use of space
+        HBox dependenciesGrid = new HBox(50);
+        dependenciesGrid.setAlignment(Pos.CENTER_LEFT);
+        dependenciesGrid.getChildren().addAll(javafxBox, mp3agicBox);
+        
+        dependenciesSection.getChildren().addAll(dependenciesTitle, dependenciesGrid);
+        
+        // Enhanced update button section
+        VBox updateSection = new VBox(updateButton);
         updateSection.setAlignment(Pos.CENTER);
+        updateSection.setPadding(new Insets(30, 0, 30, 0));
+        
+        VBox copyrightSection = new VBox(copyright);
+        copyrightSection.setAlignment(Pos.CENTER);
+        copyrightSection.setPadding(new Insets(20, 0, 0, 0));
 
-        getChildren().addAll(
-            appTitle,
-            version,
-            new Separator(),
+        // Create styled separators
+        javafx.scene.control.Separator sep1 = new javafx.scene.control.Separator();
+        sep1.setMaxWidth(600);
+        sep1.setStyle("-fx-background-color: #333333;");
+        
+        javafx.scene.control.Separator sep2 = new javafx.scene.control.Separator();
+        sep2.setMaxWidth(600);
+        sep2.setStyle("-fx-background-color: #333333;");
+        
+        javafx.scene.control.Separator sep3 = new javafx.scene.control.Separator();
+        sep3.setMaxWidth(600);
+        sep3.setStyle("-fx-background-color: #333333;");
+
+        // Add content to container with improved spacing
+        contentContainer.setSpacing(25);
+        contentContainer.getChildren().addAll(
+            titleSection,
+            sep1,
             creditsSection,
-            new Separator(),
+            sep2,
             dependenciesSection,
-            new Separator(),
+            sep3,
             updateSection,
-            new Separator(),
-            copyright
+            copyrightSection
         );
 
-        setAlignment(Pos.TOP_CENTER);
+        // Main layout - always centered
+        setAlignment(Pos.CENTER);
+        setFillWidth(false); // Don't fill full width
+        getChildren().add(contentContainer);
+        
+        // Bind responsive behavior
+        widthProperty().addListener((obs, oldWidth, newWidth) -> {
+            double width = newWidth.doubleValue();
+            if (width > 1400) {
+                // Large screens - more padding
+                setPadding(new Insets(60, 150, 60, 150));
+            } else if (width > 1000) {
+                // Medium screens - normal padding
+                setPadding(new Insets(50, 100, 50, 100));
+            } else {
+                // Small screens - less padding
+                setPadding(new Insets(40, 60, 40, 60));
+            }
+        });
     }
 
     private VBox createCreditBox(String role, String name, String githubUrl, String linkedinUrl) {
-        Label roleLabel = new Label(role + ":");
-        roleLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
-        roleLabel.setTextFill(Color.WHITE);
+        VBox creditBox = new VBox(12);
+        creditBox.setPadding(new Insets(15, 20, 15, 20));
+        creditBox.setStyle(
+            "-fx-background-color: #1A1A1A;" +
+            "-fx-background-radius: 12;" +
+            "-fx-border-color: #333333;" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 12;"
+        );
+        
+        Label roleLabel = new Label(role);
+        roleLabel.setFont(Font.font("System", FontWeight.BOLD, 18));
+        roleLabel.setTextFill(Color.web("#FA2D48"));
 
         Label nameLabel = new Label(name);
-        nameLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
+        nameLabel.setFont(Font.font("System", FontWeight.BOLD, 20));
         nameLabel.setTextFill(Color.WHITE);
 
-        // Create links container
-        HBox linksBox = new HBox(15);
+        // Create links container with better spacing
+        HBox linksBox = new HBox(12);
         linksBox.setAlignment(Pos.CENTER_LEFT);
+        linksBox.setPadding(new Insets(8, 0, 0, 0));
 
         // GitHub link with icon
         if (githubUrl != null) {
@@ -137,7 +256,8 @@ public class AboutView extends VBox {
             linksBox.getChildren().add(linkedinBtn);
         }
 
-        return new VBox(5, roleLabel, nameLabel, linksBox);
+        creditBox.getChildren().addAll(roleLabel, nameLabel, linksBox);
+        return creditBox;
     }
 
     private Button createSocialButton(String platform, String url, String icon) {
@@ -244,24 +364,118 @@ public class AboutView extends VBox {
 
     private void showUpdateDialog() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Check for Updates");
-        alert.setHeaderText("Update Check");
-        alert.setContentText("Checking for updates...\n\nYou are currently running the latest version of Auralin Music Player (v1.0.0).\n\nNo updates available at this time.");
+        alert.setTitle("Update Check");
+        alert.setHeaderText(null); // Remove default header
         
-        // Style the dialog
+        // Create custom content with premium design
+        VBox content = new VBox(20);
+        content.setAlignment(Pos.CENTER);
+        content.setPadding(new Insets(30, 40, 30, 40));
+        content.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #1a1a1a, #0d1117);" +
+            "-fx-background-radius: 15;" +
+            "-fx-border-color: #30363d;" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 15;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 20, 0, 0, 5);"
+        );
+        
+        // Custom checkmark icon with green circular background
+        javafx.scene.shape.SVGPath checkIcon = new javafx.scene.shape.SVGPath();
+        checkIcon.setContent("M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z");
+        checkIcon.setFill(Color.WHITE);
+        checkIcon.setScaleX(1.5);
+        checkIcon.setScaleY(1.5);
+        
+        javafx.scene.shape.Circle iconBackground = new javafx.scene.shape.Circle(25);
+        iconBackground.setFill(Color.web("#28a745"));
+        iconBackground.setEffect(new javafx.scene.effect.DropShadow(
+            javafx.scene.effect.BlurType.GAUSSIAN, 
+            Color.web("#28a745", 0.3), 
+            10, 0, 0, 2
+        ));
+        
+        javafx.scene.layout.StackPane iconContainer = new javafx.scene.layout.StackPane();
+        iconContainer.getChildren().addAll(iconBackground, checkIcon);
+        
+        // Title
+        Label titleLabel = new Label("Update Check Complete");
+        titleLabel.setFont(Font.font("System", FontWeight.BOLD, 22));
+        titleLabel.setTextFill(Color.WHITE);
+        
+        // Message with premium styling
+        Label messageLabel = new Label("You are running the latest version!");
+        messageLabel.setFont(Font.font("System", FontWeight.NORMAL, 16));
+        messageLabel.setTextFill(Color.web("#8b949e"));
+        messageLabel.setWrapText(true);
+        messageLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        
+        // Version info
+        Label versionLabel = new Label("Auralin Music Player v1.0.0");
+        versionLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
+        versionLabel.setTextFill(Color.web("#FA2D48"));
+        
+        // Status message
+        Label statusLabel = new Label("No updates available at this time.");
+        statusLabel.setFont(Font.font("System", FontWeight.NORMAL, 14));
+        statusLabel.setTextFill(Color.web("#6e7681"));
+        
+        content.getChildren().addAll(iconContainer, titleLabel, messageLabel, versionLabel, statusLabel);
+        
+        // Set custom content
+        alert.getDialogPane().setContent(content);
+        
+        // Style the dialog pane with premium design
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.setStyle("-fx-background-color: " + Constants.BG_BLACK + ";");
-        dialogPane.lookup(".content.label").setStyle("-fx-text-fill: white;");
-        dialogPane.lookup(".header-panel").setStyle("-fx-background-color: " + Constants.SIDEBAR_BLACK + ";");
+        dialogPane.setPrefSize(450, 280);
+        dialogPane.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #0d1117, #161b22);" +
+            "-fx-background-radius: 15;" +
+            "-fx-border-color: #30363d;" +
+            "-fx-border-width: 2;" +
+            "-fx-border-radius: 15;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 25, 0, 0, 8);"
+        );
         
-        // Fix header text color with multiple approaches
-        javafx.application.Platform.runLater(() -> {
-            dialogPane.lookup(".header-panel .label").setStyle("-fx-text-fill: #ffffffff;");
-            dialogPane.lookup(".header .label").setStyle("-fx-text-fill: #ffffffff;");
-            dialogPane.lookupAll(".header-panel .label").forEach(node -> {
-                node.setStyle("-fx-text-fill: #ffffffff;");
-            });
-        });
+        // Style the OK button with premium green gradient
+        Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
+        okButton.setText("OK");
+        okButton.setFont(Font.font("System", FontWeight.BOLD, 14));
+        okButton.setPrefWidth(120);
+        okButton.setPrefHeight(40);
+        okButton.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #28a745, #1e7e34);" +
+            "-fx-text-fill: white;" +
+            "-fx-background-radius: 20;" +
+            "-fx-border-color: #1e7e34;" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 20;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, rgba(40,167,69,0.3), 8, 0, 0, 2);"
+        );
+        
+        // Add hover effect to OK button
+        okButton.setOnMouseEntered(e -> okButton.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #34ce57, #28a745);" +
+            "-fx-text-fill: white;" +
+            "-fx-background-radius: 20;" +
+            "-fx-border-color: #28a745;" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 20;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, rgba(40,167,69,0.5), 12, 0, 0, 3);"
+        ));
+        
+        okButton.setOnMouseExited(e -> okButton.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #28a745, #1e7e34);" +
+            "-fx-text-fill: white;" +
+            "-fx-background-radius: 20;" +
+            "-fx-border-color: #1e7e34;" +
+            "-fx-border-width: 1;" +
+            "-fx-border-radius: 20;" +
+            "-fx-cursor: hand;" +
+            "-fx-effect: dropshadow(gaussian, rgba(40,167,69,0.3), 8, 0, 0, 2);"
+        ));
         
         alert.showAndWait();
     }
