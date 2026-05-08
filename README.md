@@ -81,7 +81,7 @@ Auralin follows the **MVC pattern** with additional design patterns:
 
 ### Prerequisites
 - JDK 25 (Amazon Corretto 25 recommended)
-- JavaFX SDK 25.0.2 at `D:\javafx\javafx-sdk-25.0.2`
+- JavaFX SDK 25.0.2 at `C:\javafx\javafx-sdk-25.0.2`
 - mp3agic 0.9.1 jar at `C:\Users\<user>\Downloads\mp3agic-0.9.1.jar`
 
 ### Compile & Run
