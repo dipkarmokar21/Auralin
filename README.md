@@ -120,7 +120,7 @@ filePath|liked|plays|lastPlayed|artist|durationMs
 ## Running the JAR directly
 
 ```bat
-java --module-path "D:\javafx\javafx-sdk-25.0.2\lib" --add-modules javafx.controls,javafx.media,javafx.swing -jar AuralinPlayer.jar
+java --module-path "C:\javafx\javafx-sdk-25.0.2\lib" --add-modules javafx.controls,javafx.media,javafx.swing -jar AuralinPlayer.jar
 ```
 
 ---
